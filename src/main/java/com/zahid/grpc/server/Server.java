@@ -12,6 +12,19 @@ import org.zahid.models.StudentServiceGrpc;
 @Slf4j
 public class Server extends StudentServiceGrpc.StudentServiceImplBase {
     @Override
+    public void serverSideStreaming(StudentRequest request, StreamObserver<StudentResponse> responseObserver) {
+
+    }
+
+    @Override
+    public StreamObserver<StudentRequest> clientSideStreaming(StreamObserver<StudentResponse> responseObserver) {
+    }
+
+    @Override
+    public StreamObserver<StudentRequest> biDirectionalStream(StreamObserver<StudentResponse> responseObserver) {
+    }
+
+    @Override
     public void getStudent(StudentRequest request, StreamObserver<StudentResponse> responseObserver) {
         final var builder = StudentResponse.newBuilder();
         final var zahid = builder.setName("Zahid").setAge(20).build();
