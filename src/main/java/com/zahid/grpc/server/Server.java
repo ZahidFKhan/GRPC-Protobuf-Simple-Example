@@ -23,7 +23,7 @@ public class Server extends StudentServiceGrpc.StudentServiceImplBase {
               .setAge(fakerInstance.number().numberBetween(18, 60))
               .build();
 
-      log.info("Ready to receive : {}", nextStudent);
+      log.info("Sent to client : {}", nextStudent);
       responseObserver.onNext(nextStudent);
     }
     responseObserver.onCompleted();
@@ -35,7 +35,7 @@ public class Server extends StudentServiceGrpc.StudentServiceImplBase {
     return new StreamObserver<>() {
       @Override
       public void onNext(StudentRequest value) {
-        log.info("Request received : {}", value);
+        log.info("Request received from client: {}", value);
       }
 
       @Override
@@ -55,7 +55,34 @@ public class Server extends StudentServiceGrpc.StudentServiceImplBase {
   @Override
   public StreamObserver<StudentRequest> biDirectionalStream(
       StreamObserver<StudentResponse> responseObserver) {
-    return null;
+    var observer =
+        new StreamObserver<StudentRequest>() {
+          @Override
+          public void onNext(StudentRequest studentRequest) {
+            log.info("received from client {}", studentRequest);
+            final var instance = Faker.instance();
+            final var instanceOfStudentObject =
+                StudentResponse.newBuilder()
+                    .setName(instance.name().firstName())
+                    .setAge(instance.number().numberBetween(18, 65))
+                    .build();
+
+            responseObserver.onNext(instanceOfStudentObject);
+          }
+
+          @Override
+          public void onError(Throwable t) {
+            log.error("Error occurred while processing the record");
+          }
+
+          @Override
+          public void onCompleted() {
+            responseObserver.onNext(StudentResponse.getDefaultInstance());
+            responseObserver.onCompleted();
+            log.info("Completed all the requests.");
+          }
+        };
+    return observer;
   }
 
   @Override
